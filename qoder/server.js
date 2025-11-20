@@ -72,7 +72,7 @@ app.post('/register', validateRegistration, async (req, res) => {
     const { email, password } = req.body;
     
     // Check if user already exists
-    const existingUser = db.getUserByEmail(email);
+    const existingUser = await db.getUserByEmail(email);
     if (existingUser) {
       return res.status(409).json({ error: 'User already exists' });
     }
@@ -82,7 +82,7 @@ app.post('/register', validateRegistration, async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     
     // Create user
-    const newUser = db.createUser(email, hashedPassword);
+    const newUser = await db.createUser(email, hashedPassword);
     
     // Generate JWT token
     const token = jwt.sign(
@@ -112,7 +112,7 @@ app.post('/login', validateLogin, async (req, res) => {
     const { email, password } = req.body;
     
     // Find user
-    const user = db.getUserByEmail(email);
+    const user = await db.getUserByEmail(email);
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
@@ -146,9 +146,9 @@ app.post('/login', validateLogin, async (req, res) => {
 });
 
 // Get current user endpoint
-app.get('/me', authenticateToken, (req, res) => {
+app.get('/me', authenticateToken, async (req, res) => {
   try {
-    const user = db.getUserById(req.user.id);
+    const user = await db.getUserById(req.user.id);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
